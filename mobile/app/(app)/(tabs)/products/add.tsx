@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, KeyboardAvoidingView, Platform, ActivityIndicator, Animated } from 'react-native';
 import { alert } from '../../../../src/utils/alert';
 import { router } from 'expo-router';
 import { useCreateProduct } from '../../../../src/hooks/useProducts';
@@ -7,6 +7,20 @@ import { useLocations, useCategories } from '../../../../src/hooks/useHousehold'
 import { Colors } from '../../../../src/constants/colors';
 import { barcodeApi } from '../../../../src/api/barcode';
 import BarcodeScannerModal from '../../../../src/components/BarcodeScannerModal';
+
+function Toast({ message, type }: { message: string; type: 'info' | 'success' | 'error' }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+  }, []);
+  const bg = type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : Colors.primary;
+  return (
+    <Animated.View style={[styles.toast, { backgroundColor: bg, opacity }]}>
+      {type === 'info' && <ActivityIndicator size="small" color="#fff" style={{ marginRight: 8 }} />}
+      <Text style={styles.toastText}>{message}</Text>
+    </Animated.View>
+  );
+}
 
 export default function AddProductScreen() {
   const [name, setName] = useState('');
@@ -22,6 +36,8 @@ export default function AddProductScreen() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>();
   const [scannerVisible, setScannerVisible] = useState(false);
   const [lookingUp, setLookingUp] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: locationsData } = useLocations();
   const { data: categoriesData } = useCategories();
@@ -30,10 +46,19 @@ export default function AddProductScreen() {
   const locations = locationsData?.locations ?? [];
   const categories = categoriesData?.categories ?? [];
 
+  const showToast = (message: string, type: 'info' | 'success' | 'error', duration = 3000) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ message, type });
+    if (type !== 'info') {
+      toastTimer.current = setTimeout(() => setToast(null), duration);
+    }
+  };
+
   const handleBarcodeScanned = async (scannedBarcode: string) => {
     setScannerVisible(false);
     setBarcode(scannedBarcode);
     setLookingUp(true);
+    showToast(`Szukam: ${scannedBarcode}...`, 'info');
 
     try {
       const result = await barcodeApi.lookup(scannedBarcode);
@@ -42,12 +67,12 @@ export default function AddProductScreen() {
           setName(result.product.name || '');
         }
         const label = [result.product.name, result.product.brand].filter(Boolean).join(' — ');
-        alert('Znaleziono', label);
+        showToast(label, 'success', 4000);
       } else {
-        alert('Nie znaleziono', 'Produkt nie znaleziony w bazie. Uzupełnij dane ręcznie.');
+        showToast('Nie znaleziono w bazie. Uzupełnij ręcznie.', 'error', 4000);
       }
     } catch {
-      // Lookup failed silently — barcode is still saved
+      showToast('Błąd połączenia. Kod zapisany.', 'error', 4000);
     } finally {
       setLookingUp(false);
     }
@@ -116,6 +141,7 @@ export default function AddProductScreen() {
             )}
           </TouchableOpacity>
         </View>
+        {toast && <Toast message={toast.message} type={toast.type} />}
 
         {/* Location Picker */}
         <Text style={styles.label}>Lokalizacja</Text>
@@ -204,4 +230,6 @@ const styles = StyleSheet.create({
   saveButton: { backgroundColor: Colors.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 24 },
   saveButtonDisabled: { opacity: 0.6 },
   saveButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  toast: { flexDirection: 'row', alignItems: 'center', borderRadius: 10, padding: 12, marginTop: 10 },
+  toastText: { color: '#fff', fontSize: 14, fontWeight: '500', flex: 1 },
 });
