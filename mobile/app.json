@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "HouseKeep",
+    "slug": "housekeep",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "housekeep",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.housekeep.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.housekeep.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-secure-store",
+      "expo-font",
+      ["expo-camera", {
+        "cameraPermission": "Pozwól na dostęp do kamery, aby skanować kody kreskowe."
+      }]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d5396ad7-1419-4079-b5a4-b475e35d4294"
+      }
+    },
+    "owner": "bartoszulc"
+  }
+}
