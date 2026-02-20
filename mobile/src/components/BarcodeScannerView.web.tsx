@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useZxing } from 'react-zxing';
 import { Colors } from '../constants/colors';
@@ -9,13 +9,17 @@ interface Props {
 }
 
 export default function BarcodeScannerView({ onScanned, onClose }: Props) {
+  const [scanned, setScanned] = useState(false);
+
   const handleDecodeResult = useCallback(
     (result: any) => {
+      if (scanned) return;
       if (result) {
+        setScanned(true);
         onScanned(result.getText());
       }
     },
-    [onScanned],
+    [scanned, onScanned],
   );
 
   const { ref } = useZxing({

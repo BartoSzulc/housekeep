@@ -16,7 +16,7 @@ export default function BarcodeScannerModal({ visible, onScanned, onClose }: Pro
       presentationStyle="fullScreen"
       onRequestClose={onClose}
     >
-      <BarcodeScannerView onScanned={onScanned} onClose={onClose} />
+      {visible && <BarcodeScannerView onScanned={onScanned} onClose={onClose} />}
     </Modal>
   );
 }
