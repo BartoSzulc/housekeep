@@ -9,6 +9,8 @@ interface Props {
 
 export default function BarcodeScannerView({ onScanned, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const onScannedRef = useRef(onScanned);
+  onScannedRef.current = onScanned;
   const [scanned, setScanned] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
@@ -17,39 +19,45 @@ export default function BarcodeScannerView({ onScanned, onClose }: Props) {
     let cancelled = false;
     let stream: MediaStream | null = null;
     let animFrame: number;
+    let zxingControls: { stop: () => void } | null = null;
 
-    async function start() {
-      // Get camera
+    async function acquireCamera(): Promise<MediaStream | null> {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        return await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'environment' } },
           audio: false,
         });
       } catch {
         try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          return await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
         } catch {
-          if (!cancelled) setError('Nie udało się uruchomić kamery.');
-          return;
+          return null;
         }
       }
+    }
 
-      if (cancelled) {
-        stream.getTracks().forEach((t) => t.stop());
-        return;
-      }
-
+    async function start() {
       const video = videoRef.current;
       if (!video) return;
-      video.srcObject = stream;
-      await video.play();
-      setScanning(true);
 
-      // Check for native BarcodeDetector API (Chrome Android)
       const hasBarcodeDetector = 'BarcodeDetector' in window;
 
       if (hasBarcodeDetector) {
-        // Use native BarcodeDetector — fast and reliable on mobile
+        // Native BarcodeDetector — fast and reliable on Chrome/Edge/Android
+        stream = await acquireCamera();
+        if (!stream) {
+          if (!cancelled) setError('Nie udało się uruchomić kamery.');
+          return;
+        }
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+
+        video.srcObject = stream;
+        await video.play();
+        setScanning(true);
+
         const detector = new (window as any).BarcodeDetector({
           formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'],
         });
@@ -66,7 +74,7 @@ export default function BarcodeScannerView({ onScanned, onClose }: Props) {
               if (code && code.length >= 8) {
                 setScanned(true);
                 stream?.getTracks().forEach((t) => t.stop());
-                onScanned(code);
+                onScannedRef.current(code);
                 return;
               }
             }
@@ -78,34 +86,35 @@ export default function BarcodeScannerView({ onScanned, onClose }: Props) {
 
         animFrame = requestAnimationFrame(detectLoop);
       } else {
-        // Fallback: use zxing-js directly for browsers without BarcodeDetector
+        // Fallback: use @zxing/library for browsers without BarcodeDetector (Firefox, Safari)
         try {
           const { BrowserMultiFormatReader } = await import('@zxing/library');
-          const reader = new BrowserMultiFormatReader();
+          const codeReader = new BrowserMultiFormatReader();
 
-          const decodeLoop = async () => {
-            if (cancelled || !video || video.readyState < 2) {
-              if (!cancelled) setTimeout(decodeLoop, 500);
-              return;
-            }
-            try {
-              const result = reader.decodeFromVideoElement(video);
+          if (cancelled) return;
+
+          const controls = await codeReader.decodeFromConstraints(
+            { video: { facingMode: { ideal: 'environment' } } },
+            video,
+            (result: any) => {
               if (result && !cancelled) {
                 const text = result.getText();
                 if (text && text.length >= 8) {
                   setScanned(true);
-                  stream?.getTracks().forEach((t) => t.stop());
-                  onScanned(text);
-                  return;
+                  zxingControls?.stop();
+                  onScannedRef.current(text);
                 }
               }
-            } catch {
-              // No barcode found in this frame
-            }
-            if (!cancelled) setTimeout(decodeLoop, 500);
-          };
+            },
+          );
 
-          decodeLoop();
+          zxingControls = controls;
+
+          if (cancelled) {
+            controls.stop();
+            return;
+          }
+          setScanning(true);
         } catch {
           if (!cancelled) setError('Skaner niedostępny w tej przeglądarce.');
         }
@@ -118,8 +127,15 @@ export default function BarcodeScannerView({ onScanned, onClose }: Props) {
       cancelled = true;
       if (animFrame) cancelAnimationFrame(animFrame);
       if (stream) stream.getTracks().forEach((t) => t.stop());
+      if (zxingControls) zxingControls.stop();
+      // Extra safety: stop any stream still attached to the video element
+      const video = videoRef.current;
+      if (video?.srcObject) {
+        (video.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
+        video.srcObject = null;
+      }
     };
-  }, [onScanned]);
+  }, []);
 
   if (error) {
     return (
