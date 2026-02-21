@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   searchRow: { paddingHorizontal: 16, paddingTop: 8 },
   searchInput: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, padding: 12, fontSize: 15 },
   filtersRow: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-  filterChip: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
+  filterChip: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, alignSelf: 'flex-start' },
   filterChipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
   filterChipText: { fontSize: 13, color: Colors.textSecondary },
   filterChipTextActive: { color: '#fff' },
