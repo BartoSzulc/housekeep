@@ -39,6 +39,10 @@ export default function AddProductScreen() {
   const [toast, setToast] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    return () => { if (toastTimer.current) clearTimeout(toastTimer.current); };
+  }, []);
+
   const { data: locationsData } = useLocations();
   const { data: categoriesData } = useCategories();
   const createProduct = useCreateProduct();

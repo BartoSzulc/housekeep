@@ -51,6 +51,10 @@ export default function EditProductScreen() {
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    return () => { if (toastTimer.current) clearTimeout(toastTimer.current); };
+  }, []);
+
+  useEffect(() => {
     if (product) {
       setName(product.name);
       setDescription(product.description ?? '');

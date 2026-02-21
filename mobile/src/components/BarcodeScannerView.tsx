@@ -14,7 +14,7 @@ export default function BarcodeScannerView({ onScanned, onClose }: Props) {
 
   const handleBarcodeScanned = useCallback(
     ({ data }: { type: string; data: string }) => {
-      if (scanned) return;
+      if (scanned || !data || data.length < 8) return;
       setScanned(true);
       onScanned(data);
     },
