@@ -17,7 +17,7 @@ class Product extends Model
         'household_id', 'location_id', 'category_id', 'created_by',
         'name', 'description', 'price', 'quantity', 'min_quantity',
         'expiry_date', 'is_reusable', 'restock_interval_days',
-        'last_restocked_at', 'barcode', 'on_shopping_list',
+        'last_restocked_at', 'barcode', 'image_url', 'nutriscore_grade', 'allergens', 'ingredients', 'on_shopping_list',
     ];
 
     protected $casts = [
@@ -26,6 +26,7 @@ class Product extends Model
         'price' => 'decimal:2',
         'is_reusable' => 'boolean',
         'on_shopping_list' => 'boolean',
+        'allergens' => 'array',
     ];
 
     protected static function booted(): void

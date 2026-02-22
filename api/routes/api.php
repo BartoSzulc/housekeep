@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\InviteController;
 use App\Http\Controllers\Api\V1\LocationController;
 use App\Http\Controllers\Api\V1\PriceHistoryController;
 use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\NamedShoppingListController;
 use App\Http\Controllers\Api\V1\ShoppingListController;
 use App\Http\Controllers\Api\V1\SyncController;
 use App\Http\Controllers\Api\V1\TaskCompletionController;
@@ -75,10 +76,19 @@ Route::prefix('v1')->group(function () {
                 Route::get('/products/{product}/prices', [PriceHistoryController::class, 'index']);
                 Route::post('/products/{product}/prices', [PriceHistoryController::class, 'store']);
 
-                // Shopping List
+                // Shopping List (legacy — single global list)
                 Route::get('/shopping-list', [ShoppingListController::class, 'index']);
                 Route::post('/shopping-list/generate', [ShoppingListController::class, 'generate']);
                 Route::put('/shopping-list/toggle/{product}', [ShoppingListController::class, 'toggle']);
+
+                // Named Shopping Lists
+                Route::get('/shopping-lists', [NamedShoppingListController::class, 'index']);
+                Route::post('/shopping-lists', [NamedShoppingListController::class, 'store']);
+                Route::delete('/shopping-lists/{shoppingList}', [NamedShoppingListController::class, 'destroy']);
+                Route::get('/shopping-lists/{shoppingList}/items', [NamedShoppingListController::class, 'items']);
+                Route::post('/shopping-lists/{shoppingList}/items', [NamedShoppingListController::class, 'addItem']);
+                Route::put('/shopping-lists/{shoppingList}/items/{item}', [NamedShoppingListController::class, 'toggleItem']);
+                Route::delete('/shopping-lists/{shoppingList}/items/{item}', [NamedShoppingListController::class, 'removeItem']);
 
                 // Tasks
                 Route::get('/tasks/calendar/{year}/{month}', [TaskController::class, 'calendar']);

@@ -9,7 +9,7 @@ class OpenFoodFactsService
 {
     private const BASE_URL = 'https://world.openfoodfacts.org/api/v2/product';
     private const CACHE_TTL = 60 * 60 * 24 * 30; // 30 days
-    private const FIELDS = 'product_name,product_name_pl,brands,categories_tags_pl,image_url,quantity';
+    private const FIELDS = 'product_name,product_name_pl,brands,categories_tags_pl,image_url,quantity,nutriscore_grade,allergens_tags,ingredients_text_pl';
 
     public function lookup(string $barcode): ?array
     {
@@ -35,6 +35,13 @@ class OpenFoodFactsService
 
         $product = $response->json('product');
 
+        // Allergens: strip "en:" or "pl:" prefix from tags
+        $allergensTags = $product['allergens_tags'] ?? [];
+        $allergens = array_map(
+            fn($tag) => preg_replace('/^[a-z]{2}:/', '', $tag),
+            $allergensTags
+        );
+
         $result = [
             'name' => $product['product_name_pl']
                 ?? $product['product_name']
@@ -43,6 +50,11 @@ class OpenFoodFactsService
             'categories' => $product['categories_tags_pl'] ?? [],
             'image_url' => $product['image_url'] ?? null,
             'quantity_text' => $product['quantity'] ?? null,
+            'nutriscore_grade' => isset($product['nutriscore_grade'])
+                ? strtolower($product['nutriscore_grade'])
+                : null,
+            'allergens' => array_values(array_filter($allergens)),
+            'ingredients' => $product['ingredients_text_pl'] ?? null,
         ];
 
         Cache::put($cacheKey, $result, self::CACHE_TTL); // Cache found products for 30 days

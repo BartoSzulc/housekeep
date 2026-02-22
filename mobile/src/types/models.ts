@@ -57,6 +57,10 @@ export interface Product {
   restock_interval_days: number | null;
   last_restocked_at: string | null;
   barcode: string | null;
+  image_url: string | null;
+  nutriscore_grade: 'a' | 'b' | 'c' | 'd' | 'e' | null;
+  allergens: string[];
+  ingredients: string | null;
   on_shopping_list: boolean;
   is_expired: boolean;
   is_expiring_soon: boolean;

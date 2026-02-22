@@ -6,6 +6,9 @@ export interface OpenFoodFactsProduct {
   categories: string[];
   image_url: string | null;
   quantity_text: string | null;
+  nutriscore_grade: 'a' | 'b' | 'c' | 'd' | 'e' | null;
+  allergens: string[];
+  ingredients: string | null;
 }
 
 export interface BarcodeLookupResult {

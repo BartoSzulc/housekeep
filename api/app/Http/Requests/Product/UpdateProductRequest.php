@@ -25,6 +25,11 @@ class UpdateProductRequest extends FormRequest
             'is_reusable' => ['boolean'],
             'restock_interval_days' => ['nullable', 'integer', 'min:1'],
             'barcode' => ['nullable', 'string', 'max:255'],
+            'image_url' => ['nullable', 'string', 'max:2048'],
+            'nutriscore_grade' => ['nullable', 'string', 'in:a,b,c,d,e'],
+            'allergens' => ['nullable', 'array'],
+            'allergens.*' => ['string', 'max:100'],
+            'ingredients' => ['nullable', 'string'],
             'on_shopping_list' => ['boolean'],
         ];
     }

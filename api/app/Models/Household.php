@@ -60,4 +60,9 @@ class Household extends Model
     {
         return $this->hasMany(Invite::class);
     }
+
+    public function shoppingLists(): HasMany
+    {
+        return $this->hasMany(ShoppingList::class);
+    }
 }
