@@ -27,6 +27,15 @@ export const productApi = {
   restock: (householdId: number, productId: number, data: { quantity: number; price?: number; store?: string }) =>
     apiClient.post<ProductResponse>(`/households/${householdId}/products/${productId}/restock`, data).then((r) => r.data),
 
+  consume: (householdId: number, productId: number) =>
+    apiClient.post<ProductResponse>(`/households/${householdId}/products/${productId}/consume`).then((r) => r.data),
+
+  unconsume: (householdId: number, productId: number) =>
+    apiClient.post<ProductResponse>(`/households/${householdId}/products/${productId}/unconsume`).then((r) => r.data),
+
+  consumed: (householdId: number, params?: { search?: string }) =>
+    apiClient.get<ProductListResponse>(`/households/${householdId}/products/consumed`, { params }).then((r) => r.data),
+
   // Price History
   priceHistory: (householdId: number, productId: number) =>
     apiClient.get<{ price_history: PriceHistoryEntry[] }>(`/households/${householdId}/products/${productId}/prices`).then((r) => r.data),

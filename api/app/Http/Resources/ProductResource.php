@@ -31,6 +31,7 @@ class ProductResource extends JsonResource
             'allergens' => $this->allergens ?? [],
             'ingredients' => $this->ingredients,
             'on_shopping_list' => $this->on_shopping_list,
+            'consumed_at' => $this->consumed_at?->toIso8601String(),
             'is_expired' => $this->isExpired(),
             'is_expiring_soon' => $this->isExpiringSoon(),
             'is_low_stock' => $this->isLowStock(),

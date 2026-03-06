@@ -15,7 +15,7 @@ class ProductController extends Controller
 {
     public function index(Request $request, Household $household): JsonResponse
     {
-        $query = $household->products()->with(['location', 'category']);
+        $query = $household->products()->whereNull('consumed_at')->with(['location', 'category']);
 
         if ($request->has('location_id')) {
             $query->where('location_id', $request->location_id);
@@ -97,6 +97,7 @@ class ProductController extends Controller
         $days = (int) $request->get('days', 3);
 
         $products = $household->products()
+            ->whereNull('consumed_at')
             ->whereNotNull('expiry_date')
             ->whereBetween('expiry_date', [now(), now()->addDays($days)])
             ->with(['location', 'category'])
@@ -111,6 +112,7 @@ class ProductController extends Controller
     public function lowStock(Household $household): JsonResponse
     {
         $products = $household->products()
+            ->whereNull('consumed_at')
             ->whereColumn('quantity', '<=', 'min_quantity')
             ->with(['location', 'category'])
             ->orderBy('name')
@@ -146,6 +148,47 @@ class ProductController extends Controller
 
         return response()->json([
             'product' => new ProductResource($product->fresh()->load(['location', 'category'])),
+        ]);
+    }
+
+    public function consume(Household $household, Product $product): JsonResponse
+    {
+        $product->update([
+            'consumed_at' => now(),
+            'on_shopping_list' => false,
+        ]);
+
+        return response()->json([
+            'product' => new ProductResource($product->fresh()->load(['location', 'category'])),
+        ]);
+    }
+
+    public function unconsume(Household $household, Product $product): JsonResponse
+    {
+        $product->update(['consumed_at' => null]);
+
+        return response()->json([
+            'product' => new ProductResource($product->fresh()->load(['location', 'category'])),
+        ]);
+    }
+
+    public function consumed(Request $request, Household $household): JsonResponse
+    {
+        $query = $household->products()->whereNotNull('consumed_at')->with(['location', 'category']);
+
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $products = $query->orderByDesc('consumed_at')->paginate($request->get('per_page', 50));
+
+        return response()->json([
+            'products' => ProductResource::collection($products),
+            'meta' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'total' => $products->total(),
+            ],
         ]);
     }
 }

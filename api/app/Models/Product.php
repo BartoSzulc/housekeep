@@ -18,11 +18,13 @@ class Product extends Model
         'name', 'description', 'price', 'quantity', 'min_quantity',
         'expiry_date', 'is_reusable', 'restock_interval_days',
         'last_restocked_at', 'barcode', 'image_url', 'nutriscore_grade', 'allergens', 'ingredients', 'on_shopping_list',
+        'consumed_at',
     ];
 
     protected $casts = [
         'expiry_date' => 'date',
         'last_restocked_at' => 'date',
+        'consumed_at' => 'datetime',
         'price' => 'decimal:2',
         'is_reusable' => 'boolean',
         'on_shopping_list' => 'boolean',

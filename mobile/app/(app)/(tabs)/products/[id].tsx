@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { alert, confirm } from '../../../../src/utils/alert';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useProduct, useDeleteProduct, useRestockProduct } from '../../../../src/hooks/useProducts';
+import { useProduct, useDeleteProduct, useRestockProduct, useConsumeProduct } from '../../../../src/hooks/useProducts';
 import { Colors } from '../../../../src/constants/colors';
 
 export default function ProductDetailScreen() {
@@ -10,6 +10,7 @@ export default function ProductDetailScreen() {
   const { data, isLoading } = useProduct(productId);
   const deleteProduct = useDeleteProduct();
   const restockProduct = useRestockProduct();
+  const consumeProduct = useConsumeProduct();
   const product = data?.product;
 
   const handleDelete = () => {
@@ -19,6 +20,17 @@ export default function ProductDetailScreen() {
         router.back();
       } catch {
         alert('Błąd', 'Nie udało się usunąć produktu.');
+      }
+    });
+  };
+
+  const handleConsume = () => {
+    confirm('Zuzyj produkt?', `Czy na pewno chcesz oznaczyc "${product?.name}" jako zuzyty?`, async () => {
+      try {
+        await consumeProduct.mutateAsync(productId);
+        router.back();
+      } catch {
+        alert('Blad', 'Nie udalo sie zuzyc produktu.');
       }
     });
   };
@@ -78,8 +90,11 @@ export default function ProductDetailScreen() {
         <TouchableOpacity style={styles.actionButton} onPress={() => router.push({ pathname: '/(app)/(tabs)/products/edit', params: { id: product.id } })}>
           <Text style={styles.actionButtonText}>Edytuj</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionButton, styles.consumeButton]} onPress={handleConsume}>
+          <Text style={styles.actionButtonText}>Zuzyj</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.restockButton]} onPress={handleRestock}>
-          <Text style={[styles.actionButtonText, styles.restockButtonText]}>Uzupełnij</Text>
+          <Text style={[styles.actionButtonText, styles.restockButtonText]}>Uzupelnij</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDelete}>
           <Text style={styles.deleteButtonText}>Usuń</Text>
@@ -121,6 +136,7 @@ const styles = StyleSheet.create({
   actions: { gap: 12 },
   actionButton: { backgroundColor: Colors.primary, borderRadius: 12, padding: 14, alignItems: 'center' },
   actionButtonText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  consumeButton: { backgroundColor: '#10B981' },
   restockButton: { backgroundColor: Colors.secondary },
   restockButtonText: { color: '#fff' },
   deleteButton: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.error },

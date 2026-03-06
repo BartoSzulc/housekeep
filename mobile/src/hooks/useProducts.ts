@@ -72,6 +72,39 @@ export function useDeleteProduct() {
   });
 }
 
+export function useConsumedProducts(params?: { search?: string }) {
+  const householdId = useAuthStore((s) => s.activeHouseholdId);
+  return useQuery({
+    queryKey: ['products', 'consumed', householdId, params],
+    queryFn: () => productApi.consumed(householdId!, params),
+    enabled: !!householdId,
+  });
+}
+
+export function useConsumeProduct() {
+  const householdId = useAuthStore((s) => s.activeHouseholdId);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: number) => productApi.consume(householdId!, productId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products', householdId] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'consumed', householdId] });
+    },
+  });
+}
+
+export function useUnconsumeProduct() {
+  const householdId = useAuthStore((s) => s.activeHouseholdId);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: number) => productApi.unconsume(householdId!, productId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products', householdId] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'consumed', householdId] });
+    },
+  });
+}
+
 export function useRestockProduct() {
   const householdId = useAuthStore((s) => s.activeHouseholdId);
   const queryClient = useQueryClient();

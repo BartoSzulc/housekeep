@@ -62,6 +62,7 @@ export interface Product {
   allergens: string[];
   ingredients: string | null;
   on_shopping_list: boolean;
+  consumed_at: string | null;
   is_expired: boolean;
   is_expiring_soon: boolean;
   is_low_stock: boolean;

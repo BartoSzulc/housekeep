@@ -103,6 +103,11 @@ export default function ProductListScreen() {
         />
       )}
 
+      {/* Archive button */}
+      <TouchableOpacity style={styles.archiveButton} onPress={() => router.push('/(app)/(tabs)/products/consumed')}>
+        <Text style={styles.archiveButtonText}>Zuzyte</Text>
+      </TouchableOpacity>
+
       {/* FAB */}
       <TouchableOpacity style={styles.fab} onPress={() => router.push('/(app)/(tabs)/products/add')}>
         <Text style={styles.fabText}>+</Text>
@@ -140,6 +145,8 @@ const styles = StyleSheet.create({
   emptyIcon: { fontSize: 48, marginBottom: 16 },
   emptyTitle: { fontSize: 18, fontWeight: '600', color: Colors.text },
   emptySubtitle: { fontSize: 14, color: Colors.textSecondary, marginTop: 4 },
+  archiveButton: { position: 'absolute', left: 20, bottom: 20, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 28, paddingHorizontal: 20, paddingVertical: 14, elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 4 },
+  archiveButtonText: { fontSize: 14, fontWeight: '600', color: Colors.textSecondary },
   fab: { position: 'absolute', right: 20, bottom: 20, width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4 },
   fabText: { fontSize: 28, color: '#fff', fontWeight: '300', marginTop: -2 },
 });

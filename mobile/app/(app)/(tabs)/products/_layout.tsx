@@ -13,6 +13,7 @@ export default function ProductsLayout() {
       <Stack.Screen name="add" options={{ title: 'Dodaj produkt', presentation: 'modal' }} />
       <Stack.Screen name="[id]" options={{ title: 'Szczegóły' }} />
       <Stack.Screen name="edit" options={{ title: 'Edytuj produkt', presentation: 'modal' }} />
+      <Stack.Screen name="consumed" options={{ title: 'Zuzyte produkty' }} />
     </Stack>
   );
 }

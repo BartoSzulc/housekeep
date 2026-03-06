@@ -69,7 +69,10 @@ Route::prefix('v1')->group(function () {
                 // Products
                 Route::get('/products/expiring', [ProductController::class, 'expiring']);
                 Route::get('/products/low-stock', [ProductController::class, 'lowStock']);
+                Route::get('/products/consumed', [ProductController::class, 'consumed']);
                 Route::post('/products/{product}/restock', [ProductController::class, 'restock']);
+                Route::post('/products/{product}/consume', [ProductController::class, 'consume']);
+                Route::post('/products/{product}/unconsume', [ProductController::class, 'unconsume']);
                 Route::apiResource('products', ProductController::class);
 
                 // Price History
